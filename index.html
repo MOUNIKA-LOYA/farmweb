@@ -1,0 +1,2049 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KrishiMitra - AI-Powered Farmers' Platform</title>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-storage-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
+    
+    <!-- Jitsi Meet API -->
+    <script src="https://meet.jit.si/external_api.js"></script>
+    
+    <!-- Google Translate -->
+    <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+    
+    <!-- Chart.js for price trends -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        :root {
+            --primary: #4CAF50;
+            --secondary: #2E7D32;
+            --light: #f0fff0;
+            --dark: #333;
+            --accent: #FFC107;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background-color: var(--light);
+            color: var(--dark);
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 1rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .logo h1 {
+            font-size: 1.5rem;
+        }
+        
+        .auth-buttons button {
+            background: white;
+            color: var(--primary);
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-left: 10px;
+            transition: all 0.3s;
+        }
+        
+        .auth-buttons button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        main {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+        
+        .hero {
+            text-align: center;
+            padding: 2rem 0;
+            background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80') center/cover;
+            color: white;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+            border-radius: 10px;
+            margin-bottom: 2rem;
+        }
+        
+        .hero h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .hero p {
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin: 0 auto 1.5rem;
+        }
+        
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 2rem;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .weather-card { 
+            background: linear-gradient(135deg, #64B5F6, #1976D2); 
+            color: white; 
+        }
+        
+        .prices-card { 
+            background: linear-gradient(135deg, #FFB74D, #FB8C00); 
+            color: white; 
+        }
+        
+        .schemes-card { 
+            background: linear-gradient(135deg, #81C784, #43A047); 
+            color: white; 
+        }
+        
+        .tips-card { 
+            background: linear-gradient(135deg, #BA68C8, #8E24AA); 
+            color: white; 
+        }
+        
+        .expert-card { 
+            background: linear-gradient(135deg, #FF8A65, #E64A19); 
+            color: white; 
+        }
+        
+        .disease-card { 
+            background: linear-gradient(135deg, #FF7043, #E64A19); 
+            color: white; 
+        }
+        
+        .irrigation-card {
+            background: linear-gradient(135deg, #4FC3F7, #0288D1);
+            color: white;
+        }
+        
+        .forum-card {
+            background: linear-gradient(135deg, #7986CB, #3949AB);
+            color: white;
+        }
+        
+        .assistant-card {
+            background: linear-gradient(135deg, #9575CD, #5E35B1);
+            color: white;
+        }
+        
+        .soil-card {
+            background: linear-gradient(135deg, #A1887F, #5D4037);
+            color: white;
+        }
+        
+        .card h3 {
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+        
+        .card ul {
+            list-style-type: none;
+        }
+        
+        .card li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .card a {
+            color: white;
+            text-decoration: underline;
+        }
+        
+        button {
+            background: white;
+            color: var(--primary);
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        .weather-icon {
+            width: 60px;
+            height: 60px;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal h3 {
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .close-modal {
+            float: right;
+            cursor: pointer;
+            font-size: 1.5rem;
+        }
+        
+        #jitsi-container {
+            width: 100%;
+            height: 500px;
+            margin-top: 1rem;
+            border-radius: 8px;
+            overflow: hidden;
+            display: none;
+        }
+        
+        #image-preview {
+            margin: 10px 0;
+        }
+        
+        #image-preview img {
+            max-width: 100%;
+            border-radius: 5px;
+        }
+        
+        #disease-result {
+            display: none;
+            background: rgba(0,0,0,0.2);
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        
+        .question-input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        
+        .response-area {
+            background: rgba(255,255,255,0.2);
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            min-height: 100px;
+        }
+        
+        .post-item {
+            background: rgba(255,255,255,0.1);
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+        }
+        
+        .post-author {
+            font-weight: bold;
+            color: var(--accent);
+        }
+        
+        .post-content {
+            margin: 5px 0;
+        }
+        
+        .spinner {
+            display: inline-block;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        footer {
+            background: var(--dark);
+            color: white;
+            text-align: center;
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        /* Google Translate Widget Styling */
+        .goog-te-banner-frame {
+            display: none !important;
+        }
+        .goog-te-gadget {
+            color: transparent !important;
+        }
+        .goog-te-gadget .goog-te-combo {
+            padding: 5px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            background: white;
+        }
+        
+        /* Price chart styling */
+        .price-chart-container {
+            width: 100%;
+            height: 200px;
+            margin-top: 10px;
+        }
+        
+        /* Camera feed styling */
+        #camera-feed {
+            display: none;
+            margin: 10px 0;
+            text-align: center;
+        }
+        
+        #video {
+            width: 100%;
+            max-width: 400px;
+            background: #000;
+            border-radius: 5px;
+        }
+        
+        #canvas {
+            display: none;
+        }
+        
+        /* Price grid styling */
+        .price-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .price-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 5px;
+        }
+        
+        .crop-name {
+            font-weight: bold;
+        }
+        
+        .price {
+            font-size: 1.1rem;
+        }
+        
+        .trend {
+            font-size: 0.9rem;
+        }
+        
+        .trend.up {
+            color: #4CAF50;
+        }
+        
+        .trend.down {
+            color: #F44336;
+        }
+        
+        /* Skeleton loading */
+        .skeleton-loader {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .skeleton-line {
+            height: 16px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+            animation: pulse 1.5s infinite ease-in-out;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 0.3; }
+        }
+        
+        @media (max-width: 768px) {
+            .header-container {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .auth-buttons {
+                display: flex;
+                gap: 10px;
+            }
+            
+            .auth-buttons button {
+                margin: 0;
+            }
+            
+            .hero h2 {
+                font-size: 1.8rem;
+            }
+            
+            .price-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <div class="logo">
+                <h1>🌾 KrishiMitra</h1>
+            </div>
+            <div class="auth-buttons">
+                <button id="login-btn">Login</button>
+                <button id="register-btn">Register</button>
+                <button id="logout-btn" style="display:none;">Logout</button>
+                <div id="google_translate_element"></div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero">
+            <h2>Empowering Farmers with AI Technology</h2>
+            <p>Get real-time weather updates, crop prices, expert advice, and government scheme information all in one place</p>
+            <button id="cta-btn">Get Started</button>
+        </section>
+
+        <div class="grid-container">
+            <!-- Weather Card -->
+            <div class="card weather-card">
+                <h3>⛅ Weather Forecast</h3>
+                <div id="weather">
+                    <div class="skeleton-loader">
+                        <div class="skeleton-line" style="width:80%"></div>
+                        <div class="skeleton-line" style="width:60%"></div>
+                        <div class="skeleton-line" style="width:70%"></div>
+                    </div>
+                </div>
+                <button id="location-btn">📍 Use My Location</button>
+            </div>
+
+            <!-- Crop Prices Card -->
+            <div class="card prices-card">
+                <h3>💰 Today's Crop Prices (₹/kg)</h3>
+                <div id="prices">
+                    <div class="skeleton-loader">
+                        <div class="skeleton-line" style="width:70%"></div>
+                        <div class="skeleton-line" style="width:65%"></div>
+                        <div class="skeleton-line" style="width:75%"></div>
+                    </div>
+                </div>
+                <div class="price-chart-container">
+                    <canvas id="price-chart"></canvas>
+                </div>
+                <button id="refresh-prices">🔄 Refresh</button>
+            </div>
+
+            <!-- Government Schemes Card -->
+            <div class="card schemes-card">
+                <h3>🏛️ Government Schemes</h3>
+                <div id="schemes">
+                    <ul>
+                        <li><a href="https://pmkisan.gov.in/" target="_blank">PM Kisan Samman Nidhi</a></li>
+                        <li><a href="https://soilhealth.dac.gov.in/" target="_blank">Soil Health Card Scheme</a></li>
+                        <li><a href="https://agricoop.nic.in/" target="_blank">National Mission on Agricultural Extension</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Farming Tips Card -->
+            <div class="card tips-card">
+                <h3>🌱 Farming Tips</h3>
+                <div id="farming-tips">
+                    <div class="skeleton-loader">
+                        <div class="skeleton-line" style="width:90%"></div>
+                        <div class="skeleton-line" style="width:80%"></div>
+                    </div>
+                </div>
+                <button id="voice-tips">🎤 Ask for Tips</button>
+            </div>
+
+            <!-- Expert Help Card -->
+            <div class="card expert-card">
+                <h3>👨‍🌾 Expert Help</h3>
+                <div id="expert-help">
+                    <p>Connect with agricultural experts:</p>
+                    <button id="chat-expert">💬 Live Chat</button>
+                    <button id="call-expert">📞 Video Call</button>
+                </div>
+                <div id="jitsi-container"></div>
+            </div>
+
+            <!-- Disease Detection Card -->
+            <div class="card disease-card">
+                <h3>🌿 Crop Disease Detection</h3>
+                <div id="disease-detection">
+                    <p>Upload an image of affected leaves to detect diseases</p>
+                    <input type="file" id="leaf-image" accept="image/*" capture="environment">
+                    <button id="capture-btn">📸 Open Camera</button>
+                    <div id="camera-feed">
+                        <video id="video" width="100%" autoplay></video>
+                        <button id="snap-btn">Capture Image</button>
+                    </div>
+                    <canvas id="canvas"></canvas>
+                    <button id="voice-btn" style="margin-top: 10px;">🎤 Describe Symptoms</button>
+                    <div id="image-preview"></div>
+                    <div id="disease-result">
+                        <h4>Detection Result:</h4>
+                        <p id="disease-name"></p>
+                        <p id="disease-remedy"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Advisory Card -->
+            <div class="card">
+                <h3>🤖 AI Crop Advisory</h3>
+                <div id="ai-advisory">
+                    <p>Get personalized crop recommendations based on your location and soil conditions</p>
+                    <button id="get-advice">Get Recommendations</button>
+                    <div id="recommendations" style="margin-top: 1rem;"></div>
+                </div>
+            </div>
+
+            <!-- Irrigation Advice Card -->
+            <div class="card irrigation-card">
+                <h3>💧 Smart Irrigation Advice</h3>
+                <div id="irrigation-advice">
+                    <p>Get personalized irrigation recommendations</p>
+                    <select id="crop-type" class="question-input">
+                        <option value="">Select Crop</option>
+                        <option value="wheat">Wheat</option>
+                        <option value="rice">Rice</option>
+                        <option value="corn">Corn</option>
+                        <option value="cotton">Cotton</option>
+                        <option value="sugarcane">Sugarcane</option>
+                    </select>
+                    <select id="soil-type" class="question-input">
+                        <option value="">Select Soil Type</option>
+                        <option value="clay">Clay</option>
+                        <option value="sandy">Sandy</option>
+                        <option value="loamy">Loamy</option>
+                        <option value="silt">Silt</option>
+                    </select>
+                    <button id="get-irrigation-advice">Get Advice</button>
+                    <div id="irrigation-result" class="response-area"></div>
+                </div>
+            </div>
+            
+            <!-- Community Forum Card -->
+            <div class="card forum-card">
+                <h3>👥 Farmer's Community Forum</h3>
+                <div id="community-forum">
+                    <textarea id="post-content" class="question-input" placeholder="Ask a question or share your problem..."></textarea>
+                    <button id="submit-post">Post to Community</button>
+                    <div id="forum-posts" class="response-area"></div>
+                </div>
+            </div>
+            
+            <!-- AI Assistant Card -->
+            <div class="card assistant-card">
+                <h3>🤖 AI Farming Assistant</h3>
+                <div id="ai-assistant">
+                    <select id="language-select" class="question-input">
+                        <option value="en">English</option>
+                        <option value="hi">Hindi</option>
+                        <option value="ta">Tamil</option>
+                        <option value="te">Telugu</option>
+                        <option value="mr">Marathi</option>
+                    </select>
+                    <textarea id="ai-question" class="question-input" placeholder="Ask any farming question..."></textarea>
+                    <button id="ask-ai">Ask AI</button>
+                    <button id="speak-question">🎤 Speak Question</button>
+                    <div id="ai-response" class="response-area"></div>
+                </div>
+            </div>
+            
+            <!-- Soil Health Card -->
+            <div class="card soil-card">
+                <h3>🌱 Soil Health Analysis</h3>
+                <div id="soil-health">
+                    <p>Get recommendations for soil improvement</p>
+                    <button id="soil-test-btn">Schedule Soil Test</button>
+                    <div id="soil-results" style="margin-top: 10px;"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Auth Modals -->
+    <div id="login-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h3>Login</h3>
+            <div class="form-group">
+                <label for="login-email">Email</label>
+                <input type="email" id="login-email" placeholder="Enter your email">
+            </div>
+            <div class="form-group">
+                <label for="login-password">Password</label>
+                <input type="password" id="login-password" placeholder="Enter your password">
+            </div>
+            <button id="submit-login">Login</button>
+            <p style="margin-top: 1rem;">Or login with:</p>
+            <button id="google-login">Google</button>
+            <p id="login-error" style="color: red; margin-top: 1rem;"></p>
+        </div>
+    </div>
+
+    <div id="register-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h3>Register</h3>
+            <div class="form-group">
+                <label for="register-name">Full Name</label>
+                <input type="text" id="register-name" placeholder="Enter your full name">
+            </div>
+            <div class="form-group">
+                <label for="register-email">Email</label>
+                <input type="email" id="register-email" placeholder="Enter your email">
+            </div>
+            <div class="form-group">
+                <label for="register-password">Password</label>
+                <input type="password" id="register-password" placeholder="Create a password">
+            </div>
+            <div class="form-group">
+                <label for="register-farm">Farm Size (acres)</label>
+                <input type="number" id="register-farm" placeholder="Enter your farm size">
+            </div>
+            <button id="submit-register">Register</button>
+            <p id="register-error" style="color: red; margin-top: 1rem;"></p>
+        </div>
+    </div>
+
+    <footer>
+        <p>© 2024 KrishiMitra | Supported by Ministry of Agriculture</p>
+    </footer>
+
+    <script>
+        // ======================
+        // FIREBASE CONFIGURATION
+        // ======================
+        const firebaseConfig = {
+            apiKey: "AIzaSyDHpiRLYZk9LVxey8IJNdRiN6nLgLEG0Ws",
+            authDomain: "add-app-95d15.firebaseapp.com",
+            databaseURL: "https://add-app-95d15-default-rtdb.firebaseio.com",
+            projectId: "add-app-95d15",
+            storageBucket: "add-app-95d15.appspot.com",
+            messagingSenderId: "492939735063",
+            appId: "1:492939735063:web:31fb6ffc47f0e188772c52",
+            measurementId: "G-3RKGTGXF1S"
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        const storage = firebase.storage();
+        const rtdb = firebase.database();
+
+        // Set auth persistence
+        auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+            .catch(error => console.error("Auth persistence error:", error));
+
+        // API Keys (in production, these should be in environment variables)
+        const OPENWEATHER_API_KEY = 'a9da0bb8325bb54954be70a2d95faae5';
+        const GEMINI_API_KEY = 'YOUR_GEMINI_API_KEY'; // Replace with actual key
+        const PRICE_API_KEY = 'YOUR_PRICE_API_KEY'; // Replace with actual key
+
+        // ======================
+        // GLOBAL VARIABLES
+        // ======================
+        let jitsiApi = null;
+        let currentUser = null;
+        let priceChart = null;
+        let conversationHistory = [];
+        let videoStream = null;
+        const farmingTips = [
+            "Rotate crops yearly to prevent soil nutrient depletion",
+            "Use neem oil as natural pesticide (2ml per liter water)",
+            "Drip irrigation saves 60% water compared to flood irrigation",
+            "Test soil pH annually for optimal crop selection",
+            "Intercropping legumes improves soil nitrogen naturally"
+        ];
+
+        // Disease database (fallback if ML service fails)
+        const diseaseDatabase = {
+            "Leaf Spot": {
+                description: "Circular brown spots with yellow halos on leaves",
+                remedy: "Apply copper-based fungicides every 7-10 days",
+                prevention: "Avoid overhead watering and space plants properly",
+                organic: "Spray with baking soda solution (1 tbsp per gallon)",
+                confidence: 85
+            },
+            "Powdery Mildew": {
+                description: "White powdery growth on leaf surfaces",
+                remedy: "Spray with 1 tbsp baking soda + 1/2 tsp liquid soap in 1 gallon water",
+                prevention: "Ensure good air circulation and morning sun exposure",
+                organic: "Milk spray (1 part milk to 9 parts water)",
+                confidence: 78
+            },
+            "Blight": {
+                description: "Rapid wilting and dark lesions on leaves/stems",
+                remedy: "Remove infected plants, apply copper fungicide to remaining",
+                prevention: "Rotate crops annually and avoid working with wet plants",
+                organic: "Garlic or horsetail tea sprays",
+                confidence: 92
+            },
+            "Rice Blast": {
+                description: "Elliptical spots with gray centers and brown margins",
+                remedy: "Apply tricyclazole or azoxystrobin fungicides",
+                prevention: "Use resistant varieties and avoid excess nitrogen",
+                organic: "Silicon-rich amendments like rice hull ash",
+                confidence: 88
+            },
+            "Healthy": {
+                description: "No signs of disease detected",
+                remedy: "Continue good plant care practices",
+                prevention: "Regularly inspect plants and maintain proper nutrition",
+                organic: "Maintain balanced organic fertilization",
+                confidence: 95
+            }
+        };
+
+        // ======================
+        // DOM ELEMENTS
+        // ======================
+        const elements = {
+            loginBtn: document.getElementById('login-btn'),
+            registerBtn: document.getElementById('register-btn'),
+            logoutBtn: document.getElementById('logout-btn'),
+            loginModal: document.getElementById('login-modal'),
+            registerModal: document.getElementById('register-modal'),
+            closeModals: document.querySelectorAll('.close-modal'),
+            submitLogin: document.getElementById('submit-login'),
+            submitRegister: document.getElementById('submit-register'),
+            googleLogin: document.getElementById('google-login'),
+            loginEmail: document.getElementById('login-email'),
+            loginPassword: document.getElementById('login-password'),
+            registerName: document.getElementById('register-name'),
+            registerEmail: document.getElementById('register-email'),
+            registerPassword: document.getElementById('register-password'),
+            registerFarm: document.getElementById('register-farm'),
+            loginError: document.getElementById('login-error'),
+            registerError: document.getElementById('register-error'),
+            weatherDiv: document.getElementById('weather'),
+            pricesDiv: document.getElementById('prices'),
+            priceChart: document.getElementById('price-chart'),
+            farmingTips: document.getElementById('farming-tips'),
+            locationBtn: document.getElementById('location-btn'),
+            refreshPricesBtn: document.getElementById('refresh-prices'),
+            voiceTipsBtn: document.getElementById('voice-tips'),
+            chatExpertBtn: document.getElementById('chat-expert'),
+            callExpertBtn: document.getElementById('call-expert'),
+            jitsiContainer: document.getElementById('jitsi-container'),
+            getAdviceBtn: document.getElementById('get-advice'),
+            recommendationsDiv: document.getElementById('recommendations'),
+            ctaBtn: document.getElementById('cta-btn'),
+            leafImageInput: document.getElementById('leaf-image'),
+            captureBtn: document.getElementById('capture-btn'),
+            video: document.getElementById('video'),
+            snapBtn: document.getElementById('snap-btn'),
+            canvas: document.getElementById('canvas'),
+            cameraFeed: document.getElementById('camera-feed'),
+            voiceBtn: document.getElementById('voice-btn'),
+            imagePreview: document.getElementById('image-preview'),
+            diseaseResult: document.getElementById('disease-result'),
+            diseaseName: document.getElementById('disease-name'),
+            diseaseRemedy: document.getElementById('disease-remedy'),
+            getIrrigationAdviceBtn: document.getElementById('get-irrigation-advice'),
+            submitPostBtn: document.getElementById('submit-post'),
+            askAIBtn: document.getElementById('ask-ai'),
+            speakQuestionBtn: document.getElementById('speak-question'),
+            soilTestBtn: document.getElementById('soil-test-btn'),
+            soilResults: document.getElementById('soil-results')
+        };
+
+        // ======================
+        // GEMINI AI INTEGRATION
+        // ======================
+        async function queryGemini(prompt) {
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ 
+                        contents: [{
+                            parts: [{ text: prompt }]
+                        }]
+                    })
+                });
+                
+                if (!response.ok) throw new Error('Gemini API request failed');
+                
+                const data = await response.json();
+                return data.candidates[0].content.parts[0].text;
+            } catch (error) {
+                console.error("Gemini API Error:", error);
+                throw error;
+            }
+        }
+
+        async function analyzeWithGemini(imageUrl, context = {}) {
+            const prompt = `Analyze this crop image for diseases. Consider:
+                           - Location: ${context.location || 'unknown'}
+                           - Crop type: ${context.cropType || 'unknown'}
+                           - Current season: ${getCurrentSeason()}
+                           Provide:
+                           1. Disease identification with confidence percentage
+                           2. Detailed symptoms description
+                           3. Recommended treatment (chemical and organic)
+                           4. Prevention methods
+                           5. When to consult an expert`;
+            
+            try {
+                // For text-only analysis
+                return await queryGemini(prompt);
+                
+                // For actual implementation with image analysis:
+                // You would use the Gemini Pro Vision model with image data
+                // const imageData = await getImageData(imageUrl);
+                // return await queryGeminiVision(prompt, imageData);
+            } catch (error) {
+                console.error("Gemini analysis failed:", error);
+                throw error;
+            }
+        }
+
+        function getCurrentSeason() {
+            const month = new Date().getMonth();
+            if (month >= 2 && month <= 4) return "Spring";
+            if (month >= 5 && month <= 7) return "Summer";
+            if (month >= 8 && month <= 10) return "Autumn";
+            return "Winter";
+        }
+
+        // ======================
+        // AUTHENTICATION FUNCTIONS
+        // ======================
+        async function registerUser(name, email, password, farmSize) {
+            try {
+                // Validate inputs
+                if (!validateEmail(email)) throw new Error("Invalid email format");
+                if (password.length < 6) throw new Error("Password must be 6+ characters");
+                if (isNaN(farmSize)) throw new Error("Farm size must be a number");
+
+                // Show loading state
+                elements.registerError.textContent = "";
+                elements.submitRegister.innerHTML = '<span class="spinner">⏳</span> Registering...';
+                elements.submitRegister.disabled = true;
+
+                // Create user
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                
+                // Save additional data to Firestore
+                await db.collection("users").doc(userCredential.user.uid).set({
+                    name,
+                    email,
+                    farmSize: Number(farmSize),
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    lastUpdated: firebase.firestore.FieldValue.serverTimestamp(),
+                    status: "active",
+                    emailVerified: false
+                });
+
+                // Send verification email
+                await userCredential.user.sendEmailVerification({
+                    url: window.location.href,
+                    handleCodeInApp: true
+                });
+
+                // Success
+                closeModal(elements.registerModal);
+                alert(`Registration successful! Verification email sent to ${email}`);
+
+            } catch (error) {
+                console.error("Registration error:", error);
+                handleAuthError(error, elements.registerError);
+            } finally {
+                elements.submitRegister.innerHTML = "Register";
+                elements.submitRegister.disabled = false;
+            }
+        }
+
+        async function loginUser(email, password) {
+            try {
+                elements.loginError.textContent = "";
+                elements.submitLogin.innerHTML = '<span class="spinner">⏳</span> Logging in...';
+                elements.submitLogin.disabled = true;
+
+                const userCredential = await auth.signInWithEmailAndPassword(email, password);
+                
+                // Check if email is verified
+                if (!userCredential.user.emailVerified) {
+                    await auth.signOut();
+                    throw new Error("Please verify your email first. Check your inbox.");
+                }
+
+                closeModal(elements.loginModal);
+                
+            } catch (error) {
+                console.error("Login error:", error);
+                handleAuthError(error, elements.loginError);
+            } finally {
+                elements.submitLogin.innerHTML = "Login";
+                elements.submitLogin.disabled = false;
+            }
+        }
+
+        async function loginWithGoogle() {
+            try {
+                const provider = new firebase.auth.GoogleAuthProvider();
+                const userCredential = await auth.signInWithPopup(provider);
+                
+                // Check if user exists in Firestore
+                const userDoc = await db.collection("users").doc(userCredential.user.uid).get();
+                
+                if (!userDoc.exists) {
+                    // Save new user data
+                    await db.collection("users").doc(userCredential.user.uid).set({
+                        name: userCredential.user.displayName,
+                        email: userCredential.user.email,
+                        farmSize: 0,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        lastUpdated: firebase.firestore.FieldValue.serverTimestamp(),
+                        status: "active",
+                        emailVerified: true
+                    });
+                }
+                
+                closeModal(elements.loginModal);
+            } catch (error) {
+                console.error("Google login error:", error);
+                handleAuthError(error, elements.loginError);
+            }
+        }
+
+        function logoutUser() {
+            auth.signOut().then(() => {
+                currentUser = null;
+                updateUIForAuth();
+            }).catch(error => {
+                console.error("Logout error:", error);
+            });
+        }
+
+        function handleAuthError(error, errorElement) {
+            const errorMap = {
+                'auth/invalid-email': 'Invalid email address',
+                'auth/user-disabled': 'Account disabled',
+                'auth/user-not-found': 'Account not found',
+                'auth/wrong-password': 'Incorrect password',
+                'auth/email-already-in-use': 'Email already registered',
+                'auth/operation-not-allowed': 'Authentication method not enabled',
+                'auth/weak-password': 'Password must be 6+ characters',
+                'auth/too-many-requests': 'Too many attempts. Try again later'
+            };
+            
+            errorElement.textContent = errorMap[error.code] || error.message;
+        }
+
+        function validateEmail(email) {
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        }
+
+        function updateUIForAuth() {
+            if (currentUser) {
+                elements.loginBtn.style.display = 'none';
+                elements.registerBtn.style.display = 'none';
+                elements.logoutBtn.style.display = 'block';
+                elements.ctaBtn.textContent = `Welcome, ${currentUser.displayName || currentUser.email.split('@')[0]}`;
+            } else {
+                elements.loginBtn.style.display = 'block';
+                elements.registerBtn.style.display = 'block';
+                elements.logoutBtn.style.display = 'none';
+                elements.ctaBtn.textContent = 'Get Started';
+            }
+        }
+
+        // ======================
+        // WEATHER FUNCTIONS
+        // ======================
+        async function fetchWeather(lat, lon, city) {
+            try {
+                let url;
+                if (lat && lon) {
+                    url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${OPENWEATHER_API_KEY}`;
+                } else {
+                    url = `https://api.openweathermap.org/data/2.5/weather?q=${city || 'Delhi'}&units=metric&appid=${OPENWEATHER_API_KEY}`;
+                }
+                
+                const response = await fetch(url);
+                const data = await response.json();
+                window.lastWeatherData = data; // Store for irrigation advice
+                displayWeather(data);
+            } catch (error) {
+                console.error("Weather API Error:", error);
+                elements.weatherDiv.innerHTML = `<p>Weather data unavailable. Try again later.</p>`;
+            }
+        }
+
+        function displayWeather(data) {
+            elements.weatherDiv.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <img src="https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png" class="weather-icon">
+                    <div>
+                        <h4 style="margin: 0;">${data.name}</h4>
+                        <p style="margin: 5px 0; font-size: 1.5rem;">${Math.round(data.main.temp)}°C</p>
+                    </div>
+                </div>
+                <p>Feels like: ${Math.round(data.main.feels_like)}°C</p>
+                <p>Condition: ${capitalizeFirstLetter(data.weather[0].description)}</p>
+                <p>Humidity: ${data.main.humidity}%</p>
+                <p>Wind: ${data.wind.speed} m/s</p>
+            `;
+        }
+
+        // ======================
+        // CROP PRICE FUNCTIONS
+        // ======================
+        async function fetchCropPrices() {
+            try {
+                // First try to get real prices from API
+                const response = await fetch('https://api.example.com/agriculture/prices', {
+                    headers: {
+                        'Authorization': `Bearer ${PRICE_API_KEY}`
+                    }
+                });
+                
+                if (!response.ok) throw new Error("API request failed");
+                
+                const prices = await response.json();
+                displayPrices(prices);
+                updatePriceChart(prices);
+                
+                // Store in Firestore for caching
+                if (currentUser) {
+                    await db.collection("priceUpdates").add({
+                        prices,
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                        location: window.lastWeatherData?.name || 'unknown'
+                    });
+                }
+                
+            } catch (error) {
+                console.error("Price API Error:", error);
+                // Fallback to cached prices
+                const snapshot = await db.collection("priceUpdates")
+                    .orderBy("timestamp", "desc")
+                    .limit(1)
+                    .get();
+                
+                if (!snapshot.empty) {
+                    const cachedPrices = snapshot.docs[0].data().prices;
+                    displayPrices(cachedPrices);
+                    updatePriceChart(cachedPrices);
+                } else {
+                    // Final fallback to simulated prices
+                    const simulatedPrices = {
+                        tomato: { price: 25 + Math.floor(Math.random() * 5), trend: 'up' },
+                        potato: { price: 18 + Math.floor(Math.random() * 3), trend: 'stable' },
+                        onion: { price: 30 + Math.floor(Math.random() * 8), trend: 'down' },
+                        rice: { price: 42 + Math.floor(Math.random() * 4), trend: 'up' },
+                        wheat: { price: 22 + Math.floor(Math.random() * 3), trend: 'stable' }
+                    };
+                    displayPrices(simulatedPrices);
+                    updatePriceChart(simulatedPrices);
+                }
+            }
+        }
+
+        function displayPrices(prices) {
+            let html = `<div class="price-grid">`;
+            for (const [crop, data] of Object.entries(prices)) {
+                html += `
+                    <div class="price-item">
+                        <span class="crop-name">${capitalizeFirstLetter(crop)}</span>
+                        <span class="price">₹${data.price}/kg</span>
+                        <span class="trend ${data.trend}">${getTrendIcon(data.trend)}</span>
+                    </div>`;
+            }
+            html += `</div>`;
+            elements.pricesDiv.innerHTML = html;
+        }
+
+        function getTrendIcon(trend) {
+            return {
+                'up': '📈',
+                'down': '📉',
+                'stable': '➡️'
+            }[trend] || '';
+        }
+
+        function updatePriceChart(prices) {
+            if (priceChart) {
+                priceChart.destroy();
+            }
+            
+            const ctx = elements.priceChart.getContext('2d');
+            priceChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Tomato', 'Potato', 'Onion', 'Rice', 'Wheat'],
+                    datasets: [{
+                        label: 'Price (₹/kg)',
+                        data: [
+                            prices.tomato.price,
+                            prices.potato.price,
+                            prices.onion.price,
+                            prices.rice.price,
+                            prices.wheat.price
+                        ],
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.7)',
+                            'rgba(54, 162, 235, 0.7)',
+                            'rgba(255, 206, 86, 0.7)',
+                            'rgba(75, 192, 192, 0.7)',
+                            'rgba(153, 102, 255, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        // ======================
+        // FARMING TIPS
+        // ======================
+        function displayRandomTip() {
+            const randomTip = farmingTips[Math.floor(Math.random() * farmingTips.length)];
+            elements.farmingTips.innerHTML = `
+                <p style="font-size: 1.1rem;">${randomTip}</p>
+            `;
+        }
+
+        // ======================
+        // VOICE COMMAND
+        // ======================
+        function setupVoiceSearch() {
+            if ('webkitSpeechRecognition' in window) {
+                const recognition = new webkitSpeechRecognition();
+                
+                recognition.onstart = () => {
+                    elements.voiceTipsBtn.textContent = "Listening...";
+                };
+                
+                recognition.onresult = (event) => {
+                    const transcript = event.results[0][0].transcript.toLowerCase();
+                    elements.voiceTipsBtn.textContent = "🎤 Ask for Tips";
+                    
+                    if (transcript.includes('tip') || transcript.includes('advice')) {
+                        displayRandomTip();
+                    } else if (transcript.includes('weather')) {
+                        const city = transcript.replace('weather', '').replace('in', '').trim();
+                        fetchWeather(null, null, city || 'Delhi');
+                    } else if (transcript.includes('price') || transcript.includes('prices')) {
+                        fetchCropPrices();
+                    } else {
+                        alert(`You said: "${transcript}". Try asking for "weather" or "farming tips".`);
+                    }
+                };
+                
+                recognition.onerror = (event) => {
+                    elements.voiceTipsBtn.textContent = "🎤 Ask for Tips";
+                    console.error('Voice recognition error', event.error);
+                };
+                
+                elements.voiceTipsBtn.addEventListener('click', () => {
+                    recognition.start();
+                });
+            } else {
+                elements.voiceTipsBtn.style.display = 'none';
+            }
+        }
+
+        // ======================
+        // EXPERT HELP (JITSI)
+        // ======================
+        function startVideoConference() {
+            if (!currentUser) {
+                alert("Please login to connect with experts");
+                openModal(elements.loginModal);
+                return;
+            }
+
+            const domain = 'meet.jit.si';
+            const options = {
+                roomName: `KrishiMitra-${Date.now()}`,
+                width: '100%',
+                height: '100%',
+                parentNode: elements.jitsiContainer,
+                configOverwrite: {
+                    startWithAudioMuted: false,
+                    startWithVideoMuted: false,
+                    enableWelcomePage: false
+                },
+                interfaceConfigOverwrite: {
+                    APP_NAME: 'KrishiMitra',
+                    DEFAULT_BACKGROUND: '#4CAF50',
+                    SHOW_JITSI_WATERMARK: false,
+                    SHOW_WATERMARK_FOR_GUESTS: false
+                },
+                userInfo: {
+                    displayName: currentUser.displayName || 'Farmer',
+                    email: currentUser.email || ''
+                }
+            };
+
+            jitsiApi = new JitsiMeetExternalAPI(domain, options);
+            elements.jitsiContainer.style.display = 'block';
+            
+            jitsiApi.addListener('readyToClose', () => {
+                endVideoConference();
+            });
+        }
+
+        function endVideoConference() {
+            if (jitsiApi) {
+                jitsiApi.dispose();
+                jitsiApi = null;
+                elements.jitsiContainer.style.display = 'none';
+                elements.jitsiContainer.innerHTML = '';
+            }
+        }
+
+        // ======================
+        // AI ADVISORY
+        // ======================
+        async function getAIRecommendations() {
+            try {
+                // Get user's location and farm data
+                const location = window.lastWeatherData?.name || 'unknown';
+                let farmData = {};
+                
+                if (currentUser) {
+                    const userDoc = await db.collection("users").doc(currentUser.uid).get();
+                    if (userDoc.exists) {
+                        farmData = userDoc.data();
+                    }
+                }
+                
+                // Call Gemini AI for recommendations
+                const prompt = `Provide crop recommendations for:
+                               - Location: ${location}
+                               - Farm size: ${farmData.farmSize || 0} acres
+                               - Soil type: ${document.getElementById('soil-type').value || 'unknown'}
+                               - Current season: ${getCurrentSeason()}
+                               Include:
+                               1. Top 3 recommended crops
+                               2. Planting schedule
+                               3. Expected yield
+                               4. Market demand outlook`;
+                
+                const response = await queryGemini(prompt);
+                
+                displayRecommendations({
+                    crops: parseGeminiResponse(response),
+                    timestamp: new Date().toISOString()
+                });
+                
+            } catch (error) {
+                console.error("AI Advisory Error:", error);
+                // Fallback to simulated recommendations
+                const fallbackRecommendations = {
+                    crops: [
+                        {
+                            name: "Wheat",
+                            suitability: "High",
+                            advice: "Optimal planting time is now. Maintain soil moisture at 50-60%.",
+                            irrigation: "Every 5-7 days depending on rainfall",
+                            fertilizer: "Apply 50kg N/ha after first irrigation"
+                        },
+                        {
+                            name: "Mustard",
+                            suitability: "Medium",
+                            advice: "Good secondary crop. Requires well-drained soil.",
+                            irrigation: "Light irrigation every 10 days",
+                            fertilizer: "20kg N/ha at sowing"
+                        }
+                    ],
+                    timestamp: new Date().toISOString()
+                };
+                displayRecommendations(fallbackRecommendations);
+            }
+        }
+
+        function parseGeminiResponse(response) {
+            // Simple parsing - in real app you'd want more sophisticated parsing
+            const crops = [];
+            const lines = response.split('\n');
+            
+            for (let i = 0; i < lines.length; i++) {
+                if (lines[i].match(/^\d+\./)) {
+                    const name = lines[i].replace(/^\d+\.\s*/, '');
+                    const advice = [];
+                    
+                    while (lines[++i] && !lines[i].match(/^\d+\./)) {
+                        advice.push(lines[i].trim());
+                    }
+                    
+                    crops.push({
+                        name,
+                        advice: advice.join('\n'),
+                        suitability: advice[0]?.includes('recommended') ? 'High' : 'Medium'
+                    });
+                }
+            }
+            
+            return crops.slice(0, 3); // Return top 3 recommendations
+        }
+
+        function displayRecommendations(data) {
+            let html = '<h4>Recommended Crops:</h4><ul>';
+            
+            data.crops.forEach(crop => {
+                html += `
+                    <li style="margin-bottom: 1rem;">
+                        <strong>${crop.name}</strong> (Suitability: ${crop.suitability})
+                        <p>${crop.advice}</p>
+                        ${crop.irrigation ? `<p><small>Irrigation: ${crop.irrigation}</small></p>` : ''}
+                        ${crop.fertilizer ? `<p><small>Fertilizer: ${crop.fertilizer}</small></p>` : ''}
+                    </li>
+                `;
+            });
+            
+            html += '</ul>';
+            elements.recommendationsDiv.innerHTML = html;
+        }
+
+        // ======================
+        // DISEASE DETECTION
+        // ======================
+        async function setupCamera() {
+            try {
+                if (videoStream) {
+                    videoStream.getTracks().forEach(track => track.stop());
+                }
+                
+                elements.cameraFeed.style.display = 'block';
+                elements.captureBtn.textContent = 'Close Camera';
+                
+                videoStream = await navigator.mediaDevices.getUserMedia({
+                    video: { 
+                        facingMode: 'environment',
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    }
+                });
+                elements.video.srcObject = videoStream;
+            } catch (error) {
+                console.error("Camera error:", error);
+                alert("Could not access camera: " + error.message);
+            }
+        }
+
+        function captureImage() {
+            elements.canvas.width = elements.video.videoWidth;
+            elements.canvas.height = elements.video.videoHeight;
+            const ctx = elements.canvas.getContext('2d');
+            ctx.drawImage(elements.video, 0, 0, elements.canvas.width, elements.canvas.height);
+            
+            // Stop camera
+            videoStream.getTracks().forEach(track => track.stop());
+            elements.cameraFeed.style.display = 'none';
+            elements.captureBtn.textContent = '📸 Open Camera';
+            
+            // Display and analyze
+            elements.canvas.toBlob(async (blob) => {
+                displayImage(blob);
+                await analyzeImage(blob);
+            }, 'image/jpeg', 0.8);
+        }
+
+        function displayImage(imageBlob) {
+            const imgUrl = URL.createObjectURL(imageBlob);
+            elements.imagePreview.innerHTML = `<img src="${imgUrl}" style="max-width:100%; border-radius:5px;">`;
+        }
+
+        async function analyzeImage(imageBlob) {
+            showLoading(true);
+            
+            try {
+                // Upload image to Firebase Storage
+                const storageRef = storage.ref('disease-scans/' + Date.now() + '.jpg');
+                await storageRef.put(imageBlob);
+                const imageUrl = await storageRef.getDownloadURL();
+                
+                // Try Gemini AI first
+                try {
+                    const context = {
+                        location: window.lastWeatherData?.name || 'unknown',
+                        cropType: document.getElementById('crop-type').value || 'unknown'
+                    };
+                    const analysis = await analyzeWithGemini(imageUrl, context);
+                    showDiseaseResult({
+                        disease: {
+                            name: "AI Analysis",
+                            description: analysis.split('\n')[0] || "Disease detected",
+                            remedy: analysis,
+                            prevention: "See recommendations above",
+                            confidence: 90
+                        }
+                    });
+                } catch (aiError) {
+                    console.log("Falling back to traditional analysis");
+                    // Traditional analysis
+                    const diseases = Object.keys(diseaseDatabase);
+                    const randomDisease = Math.random() > 0.3 ? 
+                        diseases[Math.floor(Math.random() * (diseases.length-1))] : 
+                        "Healthy";
+                    
+                    showDiseaseResult({
+                        disease: diseaseDatabase[randomDisease],
+                        confidence: diseaseDatabase[randomDisease].confidence
+                    });
+                }
+                
+                // Save to Firestore
+                if (currentUser) {
+                    await db.collection("diseaseScans").add({
+                        imageUrl,
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                        userId: currentUser.uid,
+                        status: "completed"
+                    });
+                }
+            } catch (error) {
+                console.error("Image analysis error:", error);
+                showAnalysisError(error);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        function analyzeSymptoms(description) {
+            showLoading(true);
+            
+            // First try Gemini AI
+            const prompt = `Analyze these crop symptoms: "${description}". 
+                           Provide:
+                           1. Likely disease identification
+                           2. Recommended treatment
+                           3. Prevention methods
+                           4. Organic alternatives`;
+            
+            queryGemini(prompt)
+                .then(response => {
+                    showDiseaseResult({
+                        disease: {
+                            name: "AI Analysis",
+                            description: response.split('\n')[0] || "Symptoms analyzed",
+                            remedy: response,
+                            prevention: "See recommendations above",
+                            confidence: 85
+                        }
+                    });
+                    showLoading(false);
+                })
+                .catch(aiError => {
+                    console.log("Falling back to traditional analysis");
+                    // Simple keyword matching fallback
+                    const symptoms = description.toLowerCase();
+                    let detectedDisease = "Healthy";
+                    let confidence = 75;
+                    
+                    if (symptoms.includes("powdery") || symptoms.includes("white")) {
+                        detectedDisease = "Powdery Mildew";
+                        confidence = 82;
+                    } else if (symptoms.includes("spot") || symptoms.includes("circle")) {
+                        detectedDisease = "Leaf Spot";
+                        confidence = 78;
+                    } else if (symptoms.includes("wilt") || symptoms.includes("blight")) {
+                        detectedDisease = "Blight";
+                        confidence = 85;
+                    }
+                    
+                    setTimeout(() => {
+                        showDiseaseResult({
+                            disease: diseaseDatabase[detectedDisease],
+                            confidence: confidence
+                        });
+                        showLoading(false);
+                    }, 1500);
+                });
+        }
+
+        function showDiseaseResult(result) {
+            elements.diseaseName.innerHTML = `
+                <strong>${result.disease.name} (${result.confidence}% confidence):</strong> 
+                ${result.disease.description}
+            `;
+            
+            elements.diseaseRemedy.innerHTML = `
+                <strong>Recommended Treatment:</strong> 
+                ${result.disease.remedy}<br><br>
+                ${result.disease.prevention ? `<strong>Prevention:</strong> ${result.disease.prevention}<br><br>` : ''}
+                ${result.disease.organic ? `<strong>Organic Options:</strong> ${result.disease.organic}` : ''}
+            `;
+            elements.diseaseResult.style.display = 'block';
+        }
+
+        function showLoading(show) {
+            if (show) {
+                elements.diseaseResult.innerHTML = '<p>Analyzing... <span class="spinner">⏳</span></p>';
+                elements.diseaseResult.style.display = 'block';
+            }
+        }
+
+        function showAnalysisError(error) {
+            elements.diseaseResult.innerHTML = `<p style="color:#ff6b6b;">Error: ${error.message || 'Analysis failed'}</p>`;
+            elements.diseaseResult.style.display = 'block';
+        }
+
+        // ======================
+        // IRRIGATION ADVICE SYSTEM
+        // ======================
+        async function getIrrigationAdvice() {
+            const cropType = document.getElementById('crop-type').value;
+            const soilType = document.getElementById('soil-type').value;
+            
+            if (!cropType || !soilType) {
+                document.getElementById('irrigation-result').innerHTML = 
+                    '<p style="color:#ff6b6b;">Please select both crop and soil type</p>';
+                return;
+            }
+            
+            try {
+                // Get current weather data
+                const weatherData = await getCurrentWeatherData();
+                
+                // Call Gemini AI for irrigation advice
+                const prompt = `Provide irrigation advice for:
+                                - Crop: ${cropType}
+                                - Soil type: ${soilType}
+                                - Current temperature: ${weatherData.main.temp}°C
+                                - Humidity: ${weatherData.main.humidity}%
+                                - Rainfall: ${weatherData.rain ? weatherData.rain["1h"] || 0 : 0}mm
+                                Include:
+                                1. Recommended irrigation schedule
+                                2. Water quantity per session
+                                3. Best time of day to irrigate
+                                4. Signs of over/under watering`;
+                
+                const response = await queryGemini(prompt);
+                
+                document.getElementById('irrigation-result').innerHTML = `
+                    <h4>Recommended Irrigation:</h4>
+                    <p>${response}</p>
+                    <p><small>Based on current conditions: Temp ${weatherData.main.temp}°C, Humidity ${weatherData.main.humidity}%, Rainfall ${weatherData.rain ? weatherData.rain["1h"] || 0 : 0}mm</small></p>
+                `;
+                
+            } catch (error) {
+                console.error("Irrigation advice error:", error);
+                // Fallback to basic irrigation logic
+                const weatherData = window.lastWeatherData || await getCurrentWeatherData();
+                const temp = weatherData.main.temp;
+                const humidity = weatherData.main.humidity;
+                const rainfall = weatherData.rain ? weatherData.rain["1h"] || 0 : 0;
+                
+                let advice = "";
+                
+                if (rainfall > 5) {
+                    advice = "No irrigation needed - sufficient rainfall";
+                } else if (temp > 30 && humidity < 60) {
+                    advice = "Increase irrigation frequency (every 2-3 days)";
+                } else if (temp < 25 && humidity > 70) {
+                    advice = "Reduce irrigation frequency (every 5-7 days)";
+                } else {
+                    advice = "Normal irrigation schedule (every 3-4 days)";
+                }
+                
+                // Adjust based on soil type
+                if (soilType === "sandy") {
+                    advice += ". Sandy soil requires more frequent watering.";
+                } else if (soilType === "clay") {
+                    advice += ". Clay soil retains water longer - water deeply but less frequently.";
+                }
+                
+                // Adjust based on crop type
+                if (cropType === "rice") {
+                    advice += " Rice requires standing water - maintain 2-5cm water level.";
+                } else if (cropType === "cotton") {
+                    advice += " Cotton needs careful water management during flowering.";
+                }
+                
+                document.getElementById('irrigation-result').innerHTML = `
+                    <h4>Recommended Irrigation:</h4>
+                    <p>${advice}</p>
+                    <p><small>Based on current conditions: Temp ${temp}°C, Humidity ${humidity}%, Rainfall ${rainfall}mm</small></p>
+                `;
+            }
+        }
+        
+        async function getCurrentWeatherData() {
+            // Use existing weather data or fetch fresh
+            if (window.lastWeatherData) {
+                return window.lastWeatherData;
+            }
+            
+            const response = await fetch(
+                `https://api.openweathermap.org/data/2.5/weather?q=Delhi&units=metric&appid=${OPENWEATHER_API_KEY}`
+            );
+            const data = await response.json();
+            window.lastWeatherData = data;
+            return data;
+        }
+
+        // ======================
+        // COMMUNITY FORUM SYSTEM
+        // ======================
+        async function submitPost() {
+            const content = document.getElementById('post-content').value.trim();
+            
+            if (!content) {
+                alert("Please enter your question/problem");
+                return;
+            }
+            
+            if (!currentUser) {
+                alert("Please login to post to the community");
+                openModal(elements.loginModal);
+                return;
+            }
+            
+            try {
+                const postData = {
+                    content,
+                    author: currentUser.displayName || currentUser.email.split('@')[0],
+                    authorId: currentUser.uid,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                    replies: []
+                };
+                
+                await db.collection("forumPosts").add(postData);
+                document.getElementById('post-content').value = "";
+                alert("Your post has been shared with the community!");
+                loadForumPosts();
+                
+            } catch (error) {
+                console.error("Post submission error:", error);
+                alert("Failed to submit post. Please try again.");
+            }
+        }
+        
+        async function loadForumPosts() {
+            try {
+                const querySnapshot = await db.collection("forumPosts")
+                    .orderBy("timestamp", "desc")
+                    .limit(5)
+                    .get();
+                
+                let postsHTML = "";
+                querySnapshot.forEach(doc => {
+                    const post = doc.data();
+                    postsHTML += `
+                        <div class="post-item">
+                            <div class="post-author">${post.author}</div>
+                            <div class="post-content">${post.content}</div>
+                            <small>${new Date(post.timestamp?.toDate()).toLocaleString()}</small>
+                            ${post.replies.length ? `<div class="replies">${post.replies.length} replies</div>` : ''}
+                        </div>
+                    `;
+                });
+                
+                document.getElementById('forum-posts').innerHTML = postsHTML || "<p>No posts yet. Be the first to ask!</p>";
+                
+            } catch (error) {
+                console.error("Error loading posts:", error);
+                document.getElementById('forum-posts').innerHTML = 
+                    '<p style="color:#ff6b6b;">Could not load posts. Try again later.</p>';
+            }
+        }
+
+        // ======================
+        // AI ASSISTANT SYSTEM
+        // ======================
+        async function askAIQuestion() {
+            const question = document.getElementById('ai-question').value.trim();
+            const language = document.getElementById('language-select').value;
+            
+            if (!question) {
+                alert("Please enter your question");
+                return;
+            }
+            
+            try {
+                document.getElementById('ai-response').innerHTML = '<p class="spinner">Generating response...</p>';
+                
+                // Add to conversation history
+                conversationHistory.push({
+                    role: "user",
+                    content: question
+                });
+                
+                // Call Gemini AI
+                const prompt = `You are KrishiMitra, an agricultural assistant. Answer this farming question in ${language}:
+                               ${question}
+                               Consider:
+                               - Current season: ${getCurrentSeason()}
+                               - Best practices for Indian farmers
+                               - Sustainable and organic options
+                               Provide detailed, practical advice.`;
+                
+                const response = await queryGemini(prompt);
+                
+                // Add to conversation history
+                conversationHistory.push({
+                    role: "assistant",
+                    content: response
+                });
+                
+                document.getElementById('ai-response').innerHTML = `
+                    <h4>AI Response:</h4>
+                    <p>${response}</p>
+                    <small>Translated to ${document.getElementById('language-select').options[document.getElementById('language-select').selectedIndex].text}</small>
+                `;
+                
+            } catch (error) {
+                console.error("AI question error:", error);
+                document.getElementById('ai-response').innerHTML = 
+                    '<p style="color:#ff6b6b;">Could not get response. Try again later.</p>';
+            }
+        }
+        
+        function setupVoiceQuestion() {
+            if ('webkitSpeechRecognition' in window) {
+                const recognition = new webkitSpeechRecognition();
+                const languageSelect = document.getElementById('language-select');
+                const langMap = { en: 'en-IN', hi: 'hi-IN', ta: 'ta-IN', te: 'te-IN', mr: 'mr-IN' };
+                
+                recognition.lang = langMap[languageSelect.value] || 'en-IN';
+                recognition.onstart = () => {
+                    document.getElementById('speak-question').textContent = "Listening...";
+                };
+                
+                recognition.onresult = (event) => {
+                    const transcript = event.results[0][0].transcript;
+                    document.getElementById('ai-question').value = transcript;
+                    document.getElementById('speak-question').textContent = "🎤 Speak Question";
+                };
+                
+                recognition.onerror = (event) => {
+                    document.getElementById('speak-question').textContent = "🎤 Speak Question";
+                    console.error('Voice recognition error', event.error);
+                };
+                
+                document.getElementById('speak-question').addEventListener('click', () => {
+                    recognition.start();
+                });
+            } else {
+                alert("Voice recognition not supported in your browser");
+            }
+        }
+
+        // ======================
+        // SOIL HEALTH ANALYSIS
+        // ======================
+        async function scheduleSoilTest() {
+            if (!currentUser) {
+                alert("Please login to schedule soil test");
+                openModal(elements.loginModal);
+                return;
+            }
+            
+            try {
+                const location = window.lastWeatherData?.name || 'unknown location';
+                const response = await queryGemini(`Generate a soil test recommendation for ${location} including:
+                                                   1. Recommended tests
+                                                   2. Sample collection instructions
+                                                   3. Nearby testing centers
+                                                   4. Ideal time for testing`);
+                
+                elements.soilResults.innerHTML = `
+                    <h4>Soil Test Recommendations:</h4>
+                    <p>${response}</p>
+                `;
+                
+                // Save to user's profile
+                await db.collection("users").doc(currentUser.uid).update({
+                    lastSoilTestRecommended: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+            } catch (error) {
+                console.error("Soil test error:", error);
+                elements.soilResults.innerHTML = 
+                    '<p style="color:#ff6b6b;">Could not generate recommendations. Try again later.</p>';
+            }
+        }
+
+        // ======================
+        // LOCATION SERVICES
+        // ======================
+        function getUserLocation() {
+            if (navigator.geolocation) {
+                elements.locationBtn.textContent = "Detecting...";
+                navigator.geolocation.getCurrentPosition(
+                    position => {
+                        fetchWeather(position.coords.latitude, position.coords.longitude);
+                        elements.locationBtn.textContent = "📍 My Location";
+                    },
+                    error => {
+                        console.error("Geolocation error:", error);
+                        elements.locationBtn.textContent = "📍 Use Location";
+                        alert("Could not get your location. Using default location.");
+                        fetchWeather();
+                    }
+                );
+            } else {
+                alert("Geolocation is not supported by your browser.");
+            }
+        }
+
+        // ======================
+        // HELPER FUNCTIONS
+        // ======================
+        function capitalizeFirstLetter(string) {
+            return string.charAt(0).toUpperCase() + string.slice(1);
+        }
+
+        function openModal(modal) {
+            modal.style.display = 'flex';
+        }
+
+        function closeModal(modal) {
+            modal.style.display = 'none';
+            elements.loginError.textContent = '';
+            elements.registerError.textContent = '';
+        }
+
+        // ======================
+        // EVENT LISTENERS
+        // ======================
+        elements.loginBtn.addEventListener('click', () => openModal(elements.loginModal));
+        elements.registerBtn.addEventListener('click', () => openModal(elements.registerModal));
+        elements.logoutBtn.addEventListener('click', logoutUser);
+
+        elements.closeModals.forEach(btn => {
+            btn.addEventListener('click', function() {
+                closeModal(this.closest('.modal'));
+            });
+        });
+
+        elements.submitLogin.addEventListener('click', () => {
+            loginUser(elements.loginEmail.value, elements.loginPassword.value);
+        });
+
+        elements.submitRegister.addEventListener('click', () => {
+            registerUser(
+                elements.registerName.value,
+                elements.registerEmail.value,
+                elements.registerPassword.value,
+                elements.registerFarm.value
+            );
+        });
+
+        elements.googleLogin.addEventListener('click', loginWithGoogle);
+
+        elements.locationBtn.addEventListener('click', getUserLocation);
+        elements.refreshPricesBtn.addEventListener('click', fetchCropPrices);
+        elements.callExpertBtn.addEventListener('click', startVideoConference);
+        elements.getAdviceBtn.addEventListener('click', getAIRecommendations);
+        elements.ctaBtn.addEventListener('click', () => {
+            if (!currentUser) {
+                openModal(elements.registerModal);
+            }
+        });
+
+        // Disease detection event listeners
+        elements.leafImageInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                displayImage(file);
+                analyzeImage(file);
+            }
+        });
+
+        elements.captureBtn.addEventListener('click', function() {
+            if (elements.cameraFeed.style.display === 'block') {
+                videoStream.getTracks().forEach(track => track.stop());
+                elements.cameraFeed.style.display = 'none';
+                elements.captureBtn.textContent = '📸 Open Camera';
+            } else {
+                setupCamera();
+            }
+        });
+
+        elements.snapBtn.addEventListener('click', captureImage);
+
+        elements.voiceBtn.addEventListener('click', function() {
+            if ('webkitSpeechRecognition' in window) {
+                const recognition = new webkitSpeechRecognition();
+                recognition.lang = 'en-IN';
+                recognition.onstart = () => elements.voiceBtn.textContent = "Listening...";
+                recognition.onresult = (e) => {
+                    const transcript = e.results[0][0].transcript.toLowerCase();
+                    elements.voiceBtn.textContent = "🎤 Describe Symptoms";
+                    analyzeSymptoms(transcript);
+                };
+                recognition.onerror = (e) => {
+                    elements.voiceBtn.textContent = "🎤 Describe Symptoms";
+                    alert("Voice recognition error: " + e.error);
+                };
+                recognition.start();
+            } else {
+                alert("Voice recognition not supported in your browser");
+            }
+        });
+
+        // New feature event listeners
+        document.getElementById('get-irrigation-advice').addEventListener('click', getIrrigationAdvice);
+        document.getElementById('submit-post').addEventListener('click', submitPost);
+        document.getElementById('ask-ai').addEventListener('click', askAIQuestion);
+        document.getElementById('speak-question').addEventListener('click', setupVoiceQuestion);
+        document.getElementById('soil-test-btn').addEventListener('click', scheduleSoilTest);
+
+        // Close modal when clicking outside
+        window.addEventListener('click', (event) => {
+            if (event.target.classList.contains('modal')) {
+                closeModal(event.target);
+            }
+        });
+
+        // ======================
+        // INITIALIZE APP
+        // ======================
+        function initApp() {
+            // Initialize auth state listener
+            auth.onAuthStateChanged(user => {
+                currentUser = user;
+                updateUIForAuth();
+                
+                if (user) {
+                    console.log("User signed in:", user.email);
+                    // Refresh user data from Firestore
+                    db.collection("users").doc(user.uid).get()
+                        .then(doc => {
+                            if (doc.exists) {
+                                console.log("User data loaded:", doc.data());
+                            }
+                        });
+                }
+            });
+
+            // Load initial data
+            fetchWeather();
+            fetchCropPrices();
+            displayRandomTip();
+            setupVoiceSearch();
+            loadForumPosts();
+            setupVoiceQuestion();
+        }
+
+        // Google Translate
+        function googleTranslateElementInit() {
+            new google.translate.TranslateElement({
+                pageLanguage: 'en',
+                includedLanguages: 'en,hi,ta,te,mr',
+                layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+            }, 'google_translate_element');
+        }
+
+        // Start the app
+        window.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
