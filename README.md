@@ -1,9 +1,9 @@
-##Krishi Mitra – AI-Powered Farmers’ Platform 
-##Overview
+#Krishi Mitra – AI-Powered Farmers’ Platform 
+#Overview
 
 Krishi Mitra (FarmWeb) is a comprehensive web-based platform designed to empower farmers with AI-driven insights. The platform provides crop recommendations, soil health analysis, disease detection from images, crop price visualization, and multilingual support. It also enables farmers to connect with experts via video consultations and community forums.
 
-##Features
+#Features
 
  AI-driven crop advice based on location and conditions
 
@@ -21,7 +21,7 @@ Krishi Mitra (FarmWeb) is a comprehensive web-based platform designed to empower
 
  User authentication and data management via Firebase
 
-##Tech Stack
+#Tech Stack
 
 Frontend: HTML, CSS, JavaScript
 
@@ -33,7 +33,7 @@ Visualization: Chart.js
 
 Video Calls: Jitsi Meet API
 
-##Installation
+#Installation
 
 Clone the repository
 
@@ -49,7 +49,7 @@ Add API keys for Google Gemini API and Google Translate API
 
 Run the project in a browser
 
-Usage
+#Usage
 
 Register or log in as a farmer
 
@@ -61,11 +61,8 @@ View crop advice, soil health analysis, and crop prices
 
 Join the community and consult experts via video calls
 
-Screenshots
 
-(Add screenshots of your app UI here)
-
-Future Enhancements
+#Future Enhancements
 
 Offline mode with auto-sync
 
@@ -73,6 +70,6 @@ AI chatbot with voice support
 
 Integration with IoT-based soil sensors
 
-Contributors
+#Contributors
 
 Mounika Loya – Team Lead and Developer
